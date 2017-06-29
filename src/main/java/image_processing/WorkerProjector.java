@@ -12,8 +12,7 @@ public class WorkerProjector implements Runnable {
 	private SegmentsQueue queue;
 	private Thread t;
 	private boolean needToContinue = true;
-	private double loggingPeriod = 10.0;
-	private int checkingLoggingPeriod = 500;
+	private double loggingPeriod = 60.0;
 	public Thread getT() {
 		return t;
 	}
@@ -29,18 +28,18 @@ public class WorkerProjector implements Runnable {
 		t.start();
 	}
 	public void run(){
-		long counter = 0;
-		long startTime = (long) (System.nanoTime() /Math.pow(10, 9));
+//		long counter = 0;
+//		long startTime = (long) (System.nanoTime() /Math.pow(10, 9));
 		while(needToContinue) {
-            LinkedList<SegmentOnLayer> segments = queue.getSegments(checkingLoggingPeriod);
+            LinkedList<SegmentOnLayer> segments = queue.getSegments();
 				paintLine(segments, tracksColor);
-				counter+=segments.size();
+/*				counter+=segments.size();
 				if((long) (System.nanoTime() /Math.pow(10, 9)) - startTime > loggingPeriod) {
                     System.out.println(String.format("%s worker processed %d segments. Remaining %d", t.getName(), counter, queue.getLength()));
 					startTime = (long) (System.nanoTime() /Math.pow(10, 9));
-				}
+				}*/
 		}
-		System.out.println(String.format("%s worker processed %d segments. Remaining %d", t.getName(), counter, queue.getLength()));
+//		System.out.println(String.format("%s worker processed %d segments. Remaining %d", t.getName(), counter, queue.getLength()));
 	}
 	public void paintLine(LinkedList<SegmentOnLayer> segms, int color) {
         for(SegmentOnLayer segm:segms) {

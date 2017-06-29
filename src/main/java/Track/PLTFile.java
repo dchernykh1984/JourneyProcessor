@@ -305,7 +305,7 @@ public class PLTFile {
         if(numberOfThreads < 1) {
             throw new Exception("Number Of processors should be more than 1");
         }
-        SegmentsQueue segmentsQueue = new SegmentsQueue();
+        SegmentsQueue segmentsQueue = new SegmentsQueue(100, numberOfThreads);
         ImagesGetter imgsCache = new ImagesGetter(rootPath);
         WorkerProjector[] projectors = new WorkerProjector[numberOfThreads];
         for(int i = 0;i<numberOfThreads;i++) {
@@ -315,19 +315,21 @@ public class PLTFile {
         for(Track track: listOfTracks) {
             totalSegmentsCounter += track.size();
             }
+        totalSegmentsCounter*=(maxDepth-minDepth+1);
         System.out.println("Total segments number is: " + totalSegmentsCounter*(maxDepth-minDepth+1));
-        totalSegmentsCounter = 0;
+        long segmentsCounter = 0;
+		double startTime = (long) (System.nanoTime() /Math.pow(10, 9));
+
         for(Track track: listOfTracks) {
-            for(long depth = minDepth;depth < maxDepth;depth++) {
+            for(long depth = minDepth;depth <= maxDepth;depth++) {
                 for(int segmentCounter = 0;segmentCounter < track.size()-1;segmentCounter++) {
                     segmentsQueue.putSegment(track.getSegment(segmentCounter), depth);
-                    while(segmentsQueue.getLength() > 100000*numberOfThreads) {
-                        Thread.sleep(100);
-                    }
-                    totalSegmentsCounter++;
-                    if(totalSegmentsCounter % 100000L == 0) {
-                        System.out.println(String.format("%d00K segments added to queue", (totalSegmentsCounter/100000L)));
-                        System.out.println(String.format("%d segments in queue", segmentsQueue.getLength()));
+                    segmentsCounter++;
+                    double currentTime = (long) (System.nanoTime() /Math.pow(10, 9));
+                    double totalTime = (currentTime - startTime)* totalSegmentsCounter/segmentsCounter;
+                    double etaTime = totalTime - currentTime + startTime;
+                    if(segmentsCounter % 10000L == 0) {
+                        System.out.println(String.format("%f percents done. ETA %f minutes. Total estimation %f minutes", (100.0*segmentsCounter)/totalSegmentsCounter, etaTime/60.0, totalTime/60.0));
                     }
                 }
             }

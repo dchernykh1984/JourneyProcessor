@@ -15,15 +15,15 @@ public class CacheDownloader {
     String POINT_NAME = "Point";
     private LinkedList<TrackPoint> areaPoints;
 
-    public Integer getPointNumber(String pointString) {
+    public int getPointNumber(String pointString) {
         return Integer.parseInt(pointString.split("_")[1].split("=")[0]);
     }
 
-    public Double getPointValue(String pointString) {
+    public double getPointValue(String pointString) {
         return Double.parseDouble(pointString.split("=")[1]);
     }
 
-    public Boolean isLatitude(String pointString) {
+    public boolean isLatitude(String pointString) {
         String val = pointString.replace(POINT_NAME, "").split("_")[0];
         if(val.equals("Lon")) return false;
         if(val.equals("Lat")) return true;
@@ -54,7 +54,7 @@ public class CacheDownloader {
         throw new RuntimeException("Not implemented. Tiles calculation placed here: F:\\distribs\\!navigation\\SAS.Planet.Release.121010\\Maps\\sas.maps\\Yandex\\YaSat.zmp");
     }
 
-    public void downloadLayer(String areaFilePath, Integer layerNumber, String layerName, String folderLocation) throws IOException, ParseException {
+    public void downloadLayer(String areaFilePath, int layerNumber, String layerName, String folderLocation) throws IOException, ParseException {
         readAreaFile(areaFilePath);
         calculateTilesList();
         downloadTiles();

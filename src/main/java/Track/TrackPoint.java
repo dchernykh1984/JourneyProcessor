@@ -1,8 +1,8 @@
 package Track;
 
-import java.text.ParseException;
-
 import Metrics.SpaceMetrics;
+
+import java.text.ParseException;
 
 public class TrackPoint {
 	private double latitude;
@@ -77,13 +77,13 @@ public class TrackPoint {
 	public double getLatitude() {
 		return latitude;
 	}
-	public void setLatitude(Double latitude) {
+	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
-	public Double getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
-	public void setLongitude(Double longitude) {
+	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
 	public boolean getBreakTrackLine() {

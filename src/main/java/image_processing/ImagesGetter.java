@@ -10,7 +10,6 @@ public class ImagesGetter {
     private synchronized boolean isLocked(String filePath) {
         for(String image:lockedImages) {
             if(image.equals(filePath)) {
-                System.out.println("File locked: " + filePath);
                 return true;
             }
         }

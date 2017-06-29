@@ -2,7 +2,9 @@ package Track;
 
 import Archievers.QualityDecreaser;
 import Archievers.TrackProector;
-import image_processing.ImageProcessor;
+import image_processing.ImagesGetter;
+import image_processing.SegmentsQueue;
+import image_processing.WorkerProjector;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -34,7 +36,7 @@ public class PLTFile {
     private Integer trackFillStyle;
     private Integer trackFillColor;
 
-    private Integer numberOfTrackPoints;
+    private long numberOfTrackPoints;
 
     private String deliminer;
     private boolean makeBreak;
@@ -137,7 +139,7 @@ public class PLTFile {
                 numberOfTrackPoints++;
             }
         }
-        System.out.println("Quality decreasing finished!");
+        System.out.println(String.format("Number of track points is %d", numberOfTrackPoints));
     }
     public void closeInputFile() throws IOException {
         inputFile.close();
@@ -296,22 +298,50 @@ public class PLTFile {
     }
     /*************************************Output File Operations  **********************/
 
-    public void proectToImage(String rootPath, long minDepth, long maxDepth, long maxNumberOfCache, int numberOfThreads, int tracksColor, String layerName, boolean clearDirRequired) throws Exception {
+    public void proectToImage(String rootPath, long minDepth, long maxDepth, int numberOfThreads, int tracksColor, boolean clearDirRequired) throws Exception {
         if(clearDirRequired) {
             clearEmptyFiles(rootPath,200, 0);
         }
         if(numberOfThreads < 1) {
             throw new Exception("Number Of processors should be more than 1");
         }
-        for(long depth = maxDepth;depth>=minDepth;depth--) {
-            while(Thread.activeCount() > numberOfThreads+1) {
-                Thread.sleep(100);
-            }
-            ImageProcessor imgsC = new ImageProcessor(rootPath, depth, depth, maxNumberOfCache, listOfTracks, tracksColor, layerName);
-            imgsC.start();
+        SegmentsQueue segmentsQueue = new SegmentsQueue();
+        ImagesGetter imgsCache = new ImagesGetter(rootPath);
+        WorkerProjector[] projectors = new WorkerProjector[numberOfThreads];
+        for(int i = 0;i<numberOfThreads;i++) {
+            projectors[i] = new WorkerProjector(segmentsQueue, tracksColor, imgsCache, "ID=" + i);
         }
-        while(Thread.activeCount() > 2) {
+        long totalSegmentsCounter = 0;
+        for(Track track: listOfTracks) {
+            totalSegmentsCounter += track.size();
+            }
+        System.out.println("Total segments number is: " + totalSegmentsCounter*(maxDepth-minDepth+1));
+        totalSegmentsCounter = 0;
+        for(long depth = minDepth;depth < maxDepth;depth++) {
+            for(Track track: listOfTracks) {
+                for(int segmentCounter = 0;segmentCounter < track.size()-1;segmentCounter++) {
+                    segmentsQueue.putSegment(track.getSegment(segmentCounter), depth);
+                    while(segmentsQueue.getLength() > 10000*numberOfThreads) {
+                        Thread.sleep(100);
+                    }
+                    totalSegmentsCounter++;
+                    if(totalSegmentsCounter % 100000L == 0) {
+                        System.out.println(String.format("%d00K segments added to queue", (totalSegmentsCounter/100000L)));
+                        System.out.println(String.format("%d segments in queue", segmentsQueue.getLength()));
+                    }
+                }
+            }
+        }
+        System.out.println("Track segments queue is done. Waiting for processing of segments. Total number of segments: " + totalSegmentsCounter);
+        while(segmentsQueue.getLength() > 0) {
             Thread.sleep(1000);
+        }
+        System.out.println("Track segments queue is Processed. Finishing.");
+        for(int i = 0;i<numberOfThreads;i++) {
+            projectors[i].stopWorker();
+        }
+        for(int i = 0;i<numberOfThreads;i++) {
+            projectors[i].getT().join();
         }
     }
     public void openOutputFile() throws IOException {
@@ -338,7 +368,7 @@ public class PLTFile {
                 rgb.toString() + deliminer + trackDescription + deliminer + trackSkipValue.toString() +
                 deliminer + trackType.toString() + deliminer + trackFillStyle.toString() +
                 deliminer + trackFillColor.toString());
-        writeLine(numberOfTrackPoints.toString());
+        writeLine(new Long(numberOfTrackPoints).toString());
     }
     public void writeData() throws IOException {
         numberOfTrackPoints = 0;

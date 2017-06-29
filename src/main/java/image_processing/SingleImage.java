@@ -3,25 +3,22 @@ package image_processing;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 public class SingleImage {
 	BufferedImage thisImage;
-	String filePath; 
+	String filePath;
 	public SingleImage(String path) {
 		filePath = path;
 	}
 	public boolean fileExists() {
-        File tmpFile = new File(filePath);
-        try {
-            ImageIO.read(tmpFile);
-        } catch (Exception e) {
-            new File(filePath).delete();
-            return false;
-        }
-        return new File(filePath).exists();
+		return new File(filePath).exists();
 	}
-	public void read() throws Exception {
+
+	public void read() {
+		read(filePath);
+	}
+
+	public void read(String filePath) {
 		try{
 		File tmpFile = new File(filePath);
 		thisImage = ImageIO.read(tmpFile);
@@ -33,14 +30,14 @@ public class SingleImage {
 	public int getPixel(double x, double y) {
 		return thisImage.getRGB((int)(x*thisImage.getWidth()), (int)(y*thisImage.getHeight()));
 	}
-	public void setPixel(double x, double y, int color) {
+	public synchronized void setPixel(double x, double y, int color) {
 		if(thisImage != null) {
 			thisImage.setRGB((int)((x)*thisImage.getWidth()), (int)((y)*thisImage.getHeight()), color);
 		} else {
 			System.out.print("Problem in setting pixel: SingleImage, function setPixel(...)\n");
 		}
 	}
-	public void write() throws IOException {
+	public void write() {
 		File tmpFile = new File(filePath);
 		tmpFile.mkdirs();
 		try {

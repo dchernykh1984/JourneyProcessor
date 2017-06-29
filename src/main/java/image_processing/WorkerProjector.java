@@ -12,16 +12,8 @@ public class WorkerProjector implements Runnable {
 	private SegmentsQueue queue;
 	private Thread t;
 	private boolean needToContinue = true;
-	private double loggingPeriod = 30.0;
-	private int checkingLoggingPeriod = 100;
-	private int resourceWaitTime = 100;
-	private void waitForResource() {
-		try {
-			Thread.sleep(resourceWaitTime);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+	private double loggingPeriod = 10.0;
+	private int checkingLoggingPeriod = 500;
 	public Thread getT() {
 		return t;
 	}
@@ -73,9 +65,7 @@ public class WorkerProjector implements Runnable {
 				currentImage.write();
 				imgsGetter.unlockImage(currentImage.getFilePath());
 			}
-			while(!imgsGetter.lockImage(requiredPath)) {
-				waitForResource();
-			}
+			imgsGetter.lockImage(requiredPath);
 			currentImage = new SingleImage(requiredPath);
 			if (currentImage.fileExists()) {
 				currentImage.read();

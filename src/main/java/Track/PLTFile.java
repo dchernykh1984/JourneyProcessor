@@ -317,11 +317,11 @@ public class PLTFile {
             }
         System.out.println("Total segments number is: " + totalSegmentsCounter*(maxDepth-minDepth+1));
         totalSegmentsCounter = 0;
-        for(long depth = minDepth;depth < maxDepth;depth++) {
-            for(Track track: listOfTracks) {
+        for(Track track: listOfTracks) {
+            for(long depth = minDepth;depth < maxDepth;depth++) {
                 for(int segmentCounter = 0;segmentCounter < track.size()-1;segmentCounter++) {
                     segmentsQueue.putSegment(track.getSegment(segmentCounter), depth);
-                    while(segmentsQueue.getLength() > 10000*numberOfThreads) {
+                    while(segmentsQueue.getLength() > 100000*numberOfThreads) {
                         Thread.sleep(100);
                     }
                     totalSegmentsCounter++;
@@ -334,7 +334,7 @@ public class PLTFile {
         }
         System.out.println("Track segments queue is done. Waiting for processing of segments. Total number of segments: " + totalSegmentsCounter);
         while(segmentsQueue.getLength() > 0) {
-            Thread.sleep(1000);
+            Thread.sleep(100);
         }
         System.out.println("Track segments queue is Processed. Finishing.");
         for(int i = 0;i<numberOfThreads;i++) {

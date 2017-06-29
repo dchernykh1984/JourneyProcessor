@@ -7,10 +7,23 @@ public class ImagesGetter {
 	private LinkedList<String> lockedImages;
 	String rootPath;
 
-	public synchronized boolean lockImage(String filePath) {
+    private synchronized boolean isLocked(String filePath) {
         for(String image:lockedImages) {
             if(image.equals(filePath)) {
-                return false;
+                System.out.println("File locked: " + filePath);
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+	public synchronized boolean lockImage(String filePath) {
+        while(isLocked(filePath)) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         lockedImages.add(filePath);
@@ -20,6 +33,7 @@ public class ImagesGetter {
         for(String image:lockedImages) {
             if(image.equals(filePath)) {
                 lockedImages.remove(image);
+                notify();
                 return;
             }
         }

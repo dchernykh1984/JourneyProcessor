@@ -20,7 +20,7 @@ public class Runner {
         tracks.openInputFile();
         tracks.readFile(new TrackPoint(coordinates), distanceMeters,10.0, false, 3000.0);
         tracks.closeInputFile();
-        tracks.proectToImage("F:\\distribs\\!navigation\\SAS.Planet.Release.121010\\cache\\" + tilesFolder, 5, deep, 10, color_custom/*, "!!!" + trackFileName + " to " + tilesFolder + "!!!"*/, clearTracksRequired);
+        tracks.proectToImage("F:\\distribs\\!navigation\\SAS.Planet.Release.121010\\cache\\" + tilesFolder, 5, deep, 4, color_custom/*, "!!!" + trackFileName + " to " + tilesFolder + "!!!"*/, clearTracksRequired);
     }
 
 

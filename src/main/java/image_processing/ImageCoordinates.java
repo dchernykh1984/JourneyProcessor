@@ -22,7 +22,7 @@ public class ImageCoordinates {
         this.depth = depth;
     }
 
-    private static double getImageX(double longitude, long depth) {
+    public static double getImageX(double longitude, long depth) {
         return Math.pow(2.0, depth-1.0) * (longitude + 180.0)/360.0;
     }
     public static double getImageY(double latitude, long depth) {

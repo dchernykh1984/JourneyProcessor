@@ -15,23 +15,46 @@ public class Runner {
     }
 
     public static void paintTracks(int color_custom, String trackFileName, String tilesFolder, boolean clearTracksRequired, int deep, String coordinates, double distanceMeters) throws Exception {
-
-        PLTFile tracks = new PLTFile("F:\\distribs\\!navigation\\SAS.Planet.Release.121010\\cache\\!!!!!tracks\\" + trackFileName, "d:\\southOut4.plt");
+        String fullFileName = "F:\\distribs\\!navigation\\SAS.Planet.Release.121010\\cache\\!!!!!tracks\\" + trackFileName;
+        System.out.println("Start painting tracks: " + fullFileName);
+        PLTFile tracks = new PLTFile(fullFileName, "d:\\southOut4.plt");
         tracks.openInputFile();
         tracks.readFile(new TrackPoint(coordinates), distanceMeters,10.0, false, 3000.0);
         tracks.closeInputFile();
         tracks.proectToImage("F:\\distribs\\!navigation\\SAS.Planet.Release.121010\\cache\\" + tilesFolder, 5, deep, 5, color_custom/*, "!!!" + trackFileName + " to " + tilesFolder + "!!!"*/, clearTracksRequired);
     }
 
-
     public static void main(String[] args) throws IOException {
 //        rename("F:\\pictures\\walls\\not_done\\correct_time", "F:\\pictures\\walls\\done");
 //        copyPhotos("F:\\pictures\\photos\\2016-09-17_wedding_ant");
         try {
+/*            PLTFile.deleteTiles("F:\\distribs\\!navigation\\SAS.Planet.Release.121010\\cache\\yasat",16,17,
+                    "55.5,31.0,1,0.0,0.0,,",
+                    "57.0,38.0,1,0.0,0.0,,",
+                    "57.0,42.0,1,0.0,0.0,,",
+                    "55.0,45.0,1,0.0,0.0,,",
+                    "53.0,43.0,1,0.0,0.0,,",
+                    "53.0,33.0,1,0.0,0.0,,",
+                    "54.0,31.0,1,0.0,0.0,,");*/
+            paintTracks(getUnsignedInt(0xFF0000), "Kazakh01.plt", "googletraf",  false, 18, "44.0,79.0,1,0.0,0.0,,", 5000000.0);
+
             //KRASNODAR
-            long startTime = (long) (System.nanoTime() /Math.pow(10, 9));
-            for(int i = 3;i<=3;i++) { paintTracks(getUnsignedInt(0xFF0000), String.format("IssykKul%d.plt", i), "googletraf",  false, 17, "44.0,41.0,1,0.0,0.0,,", 5000000.0); }
-            System.out.println("Took seconds: " + ((long) (System.nanoTime() /Math.pow(10, 9)) - startTime));
+//            long startTime = (long) (System.nanoTime() /Math.pow(10, 9));
+            new PLTFile().clearEmptyFiles("F:\\distribs\\!navigation\\SAS.Planet.Release.121010\\cache\\yahyb", 1, 0);
+/*            new PLTFile().clearEmptyFiles("F:\\distribs\\!navigation\\cyprus\\cache\\WikiMapHyb", 500, 0);
+//            new PLTFile().clearEmptyFiles("F:\\distribs\\!navigation\\cyprus\\cache\\yahyb", 400, 0);
+//            new PLTFile().clearConverted("F:\\distribs\\!navigation\\cyprus\\cache\\Both", "F:\\distribs\\!navigation\\cyprus\\cache\\both2", 0);
+//            new PLTFile().copyConverted("F:\\distribs\\!navigation\\cyprus\\cache\\both2", "F:\\distribs\\!navigation\\cyprus\\cache\\both_road", 0);
+//            new PLTFile().copyConverted("F:\\distribs\\!navigation\\cyprus\\cache\\both2", "F:\\distribs\\!navigation\\cyprus\\cache\\both_mtb", 0);
+            for(int i = 1;i<=12;i++) {
+                paintTracks(getUnsignedInt(0xFF0000), String.format("mtb%d.plt", i), "mtb",  false, 18, "35.0,33.0,1,0.0,0.0,,", 5000000.0);
+                paintTracks(getUnsignedInt(0xFF0000), String.format("mtb%d.plt", i), "both_mtb",  false, 18, "35.0,33.0,1,0.0,0.0,,", 5000000.0);
+            }
+            for(int i = 1;i<=3;i++) {
+                paintTracks(getUnsignedInt(0xFF0000), String.format("road%d.plt", i), "both_road",  false, 18, "35.0,33.0,1,0.0,0.0,,", 5000000.0);
+//                paintTracks(getUnsignedInt(0xFF0000), String.format("road%d.plt", i), "road",  false, 18, "35.0,33.0,1,0.0,0.0,,", 5000000.0);
+            }
+            System.out.println("Took seconds: " + ((long) (System.nanoTime() /Math.pow(10, 9)) - startTime));*/
 //done            for(int i = 10;i<=16;i++) { paintTracks(getUnsignedInt(0xFF0000), String.format("GpsiesTrack%d.plt", i), "googletraf",  false, 18, "44.0,41.0,1,0.0,0.0,,", 500000.0); }
 //done            for(int i = 1;i<=3;i++) { paintTracks(getUnsignedInt(0xFF0000), String.format("walk%d.plt", i), "walk",  false, 18, "44.0,41.0,1,0.0,0.0,,", 500000.0); }
 //done            for(int i = 16;i<=16;i++) { paintTracks(getUnsignedInt(0xFF0000), String.format("GpsiesTrack%d.plt", i), "bike",  false, 18, "44.0,41.0,1,0.0,0.0,,", 500000.0); }

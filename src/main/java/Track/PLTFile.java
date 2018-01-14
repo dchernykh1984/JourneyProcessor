@@ -2,12 +2,14 @@ package Track;
 
 import Archievers.QualityDecreaser;
 import Archievers.TrackProector;
+import image_processing.ImageCoordinates;
 import image_processing.ImagesGetter;
 import image_processing.SegmentsQueue;
 import image_processing.WorkerProjector;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.text.ParseException;
 import java.util.LinkedList;
 
 public class PLTFile {
@@ -255,6 +257,84 @@ public class PLTFile {
             System.out.println(currentDirectory.getPath() + " of level " + treeLevel + ". Files processed (copy converted):" + numberOfFiles + ". Files copied: " + numberOfCopiedFiles + ". Filed already existed: " + (numberOfFiles - numberOfCopiedFiles));
         }
     }
+
+
+    static boolean less(double a, double b) {
+        return b-a>0;
+    }
+    static double vectorMulti(double ax, double ay, double bx, double by) {
+        return ax*by - bx*ay;
+    }
+    static boolean pointInsidePolygon(double xCoord, double yCoord, int depth, String ... coordinates) throws ParseException {
+        String previousCoord = null;
+        int crossesNumber = 0;
+        for(String coordinate: coordinates) {
+            if(previousCoord == null) {
+                previousCoord = coordinates[coordinates.length-1];
+            }
+            TrackPoint prevousPoint = new TrackPoint(previousCoord);
+            TrackPoint currentPoint = new TrackPoint(coordinate);
+            double x1 = ImageCoordinates.getImageX(prevousPoint.getLongitude(), depth), y1 = ImageCoordinates.getImageY(prevousPoint.getLatitude(), depth),
+                    x2 = ImageCoordinates.getImageX(currentPoint.getLongitude(), depth), y2 = ImageCoordinates.getImageY(currentPoint.getLatitude(), depth),
+                    x3 = xCoord, y3 = yCoord, x4 = xCoord, y4 = Math.pow(2, depth);
+
+            double v1 = vectorMulti(x4-x3, y4-y3, x1-x3, y1-y3),
+                    v2 = vectorMulti(x4-x3, y4-y3, x2-x3, y2-y3),
+                    v3 = vectorMulti(x2-x1, y2-y1, x3-x1, y3-y1),
+                    v4 = vectorMulti(x2-x1, y2-y1, x4-x1, y4-y1);
+            if(less(v1*v2, 0) && less(v3*v4, 0)) {
+                crossesNumber++;
+            }
+            previousCoord = coordinate;
+        }
+        return crossesNumber % 2 == 1;
+    }
+    static int counterRemoved = 0;
+    static int counterTotal = 0;
+
+    public static void deleteTiles(String rootPath, int smalestDeep, int biggestDeep, String ... coordinates) throws Exception {
+        if(!new File(rootPath).exists()) {
+            throw new Exception("Directory not exists: " + rootPath);
+        }
+        for(int depth = smalestDeep;depth <= biggestDeep; depth++) {
+            File layerDirectory = new File(rootPath + "\\z" + depth);
+            for(File x1coord:layerDirectory.listFiles()) {
+                for(File x2coord: x1coord.listFiles()) {
+                    for(File y1coord:x2coord.listFiles()) {
+                        for(File y2coord:y1coord.listFiles()) {
+                            counterTotal++;
+                            double x2 = Integer.parseInt(x2coord.getName().replace("x", ""));
+                            double y2 = Integer.parseInt(y2coord.getName().replace("y", "").split("\\.")[0]);
+                            if(pointInsidePolygon(x2, y2, depth, coordinates) ||
+                                    pointInsidePolygon(x2 + 1, y2, depth, coordinates) ||
+                                    pointInsidePolygon(x2 + 1, y2 + 1, depth, coordinates) ||
+                                    pointInsidePolygon(x2, y2 + 1, depth, coordinates)) {
+//                                System.out.println(x2 + " " + y2);
+//                                System.out.println(counter);
+                            } else {
+                                y2coord.delete();
+                                counterRemoved++;
+                            }
+                            if(counterTotal %1000 == 0) {
+                                System.out.println(String.format("Total processed %d, total removed %d, current layer %d, delete percentage %f",  counterTotal, counterRemoved, depth,  counterRemoved * 100.0 / counterTotal));
+                            }
+                        }
+                        if(y1coord.listFiles().length == 0) {
+                            y1coord.delete();
+                        }
+                    }
+                    if(x2coord.listFiles().length == 0) {
+                        x2coord.delete();
+                    }
+                }
+                if(x1coord.listFiles().length == 0) {
+                    x1coord.delete();
+                }
+            }
+        }
+
+    }
+
 
 
     public void clearEmptyFiles(String rootPath, long minimumSize, int treeLevel) throws Exception {
